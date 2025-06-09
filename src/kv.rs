@@ -49,6 +49,7 @@
 //! ```
 #![allow(clippy::result_map_unit_fn)]
 
+use std::io::{BufRead};
 use std::fs::{self, File, OpenOptions};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
@@ -258,6 +259,24 @@ impl MicroKV {
         V: Serialize,
     {
         self.namespace_default().put(key, value)
+    }
+
+    pub fn put_file(&self, path: impl AsRef<Path>) -> Result<()>
+    {
+        let file = File::open(path)?;
+        let reader = std::io::BufReader::new(file);
+        for line in reader.lines() {
+            match line {
+                Ok(content) => {
+                    let entry: Vec<&str> = content.split(',').collect();
+                    self.put(entry[0], &entry[1])?;
+                    self.commit()?;
+                },
+                Err(e) => eprintln!("Error reading line: {}", e),
+            }
+        }
+        
+        Ok(())
     }
 
     /// Delete removes an entry in the key value store.

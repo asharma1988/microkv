@@ -61,6 +61,17 @@ fn parse_args<'a>() -> ArgMatches<'a> {
                         .takes_value(true),
                 ),
         )
+        .subcommand(
+            SubCommand::with_name("put_file")
+                .about("Reads the file contents and adds KV pairs to storage.")
+                .arg(
+                    Arg::with_name("file")
+                        .short("f")
+                        .long("file")
+                        .required(true)
+                        .takes_value(true),
+                ),
+        )
         // `get` retrieves a value by key, and decrypts it
         .subcommand(
             SubCommand::with_name("get")
@@ -153,6 +164,12 @@ fn run() -> Result<()> {
             for key in keys {
                 println!("{}", key);
             }
+        }
+        ("put_file", Some(subargs)) => {
+            let file_path: &str = subargs.value_of("file").unwrap();
+
+            kv.put_file(file_path)?;
+            println!("Inserted key-value pairs from file `{}`", file_path);
         }
         _ => {}
     }
