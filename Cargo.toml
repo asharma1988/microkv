@@ -14,7 +14,7 @@ readme = "README.md"
 edition = "2018"
 
 [workspace]
-members = ["cli"]
+members = ["cli","service"]
 
 [dependencies]
 bincode = "1.2.1"
