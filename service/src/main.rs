@@ -59,8 +59,17 @@ fn process_cmds(kv: &mut MicroKV, args: &Vec<String>) -> Result<()> {
         for key in keys {
             println!("{}", key);
         }
+    } else if cmd == "flush" {
+        if let Err(e) = kv.commit() {
+            eprintln!("Error while flushing: {}", e);
+            return Err(Error.into());
+        }
     } else if cmd == "rm" {
-
+        let key: &String = &args[1];
+        if let Err(e) = kv.delete(key) {
+            eprintln!("Error while deleting key {}: {}", key, e);
+            return Err(Error.into());
+        }
     } else {
         println!("Unknown command: {}", cmd);
         return Err(Error.into());
