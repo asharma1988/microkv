@@ -7,15 +7,22 @@ use std::fmt::Error;
 use clap::{App, Arg, ArgMatches, Result};
 
 fn get_db_name<'a>() -> ArgMatches<'a> {
-    App::new("microkv-svc")
+    App::new("microkv-client")
         .version("0.1.0")
         .author("ex0dus <ex0dus at codemuch.tech>")
         .arg(
             Arg::with_name("DATABASE")
-                .required(true)
-                .index(1)
+                .required(false)
                 .help("Name of database to interact with. Will be created if doesn't exist.")
                 .takes_value(false),
+        )
+        .arg(
+            Arg::with_name("remote")
+                .short("r")
+                .long("remote")
+                .help("Connect to a remote database server.")
+                .takes_value(true)
+                .required(false),
         )
         .get_matches()
 }
@@ -29,6 +36,10 @@ fn get_db(dbname: &str) -> Result<MicroKV> {
     };
     Ok(kv)
 }
+
+/*fn parse_args(args: &ArgMatches) -> Result<String> {
+
+}*/
 
 fn process_cmds(kv: &mut MicroKV, args: &Vec<String>) -> Result<()> {
     let cmd: &String = &args[0];
@@ -80,7 +91,11 @@ fn process_cmds(kv: &mut MicroKV, args: &Vec<String>) -> Result<()> {
 fn main() {
     let dbname_args: ArgMatches = get_db_name();
     let dbname: &str= dbname_args.value_of("DATABASE").expect("Cant get database name");
-
+    let mut server: &str = "localhost"; // Default to localhost if not specified
+    match dbname_args.value_of("remote") {
+        Some(remote) => server = remote,
+        None => {}
+    };
     let mut kv: MicroKV = match get_db(dbname) {
         Ok(kv) => kv,
         Err(e) => {
@@ -90,9 +105,13 @@ fn main() {
     };
 
     loop {
-        print!("{dbname}> ");
 
+        print!("{dbname}@{server}> ");
         io::stdout().flush().unwrap();
+
+        if server != "localhost" {
+            
+        }
 
         let mut input = String::new();
 
